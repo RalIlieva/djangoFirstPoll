@@ -24,7 +24,7 @@ class QuestionModelTests(TestCase):
         was_published_recently() returns False for questions whose pub_date
         is older than 1 day.
         """
-        time = timezone.now() + datetime.timedelta(days=1, seconds=1)
+        time = timezone.now() - datetime.timedelta(days=1, seconds=1)
         old_question = Question(pub_date=time)
         self.assertIs(old_question.was_published_recently(), False)
 
@@ -34,7 +34,7 @@ class QuestionModelTests(TestCase):
         was_published_recently() returns True for questions whose pub_date
         is within the last day.
         """
-        time = timezone.now() + datetime.timedelta(hours=23, minutes=56, seconds=59)
+        time = timezone.now() - datetime.timedelta(hours=23, minutes=56, seconds=59)
         recent_question = Question(pub_date=time)
         self.assertIs(recent_question.was_published_recently(), True)
 
@@ -71,7 +71,7 @@ class QuestionIndexViewTests(TestCase):
         """"Questions with future pub_date - not displayed on index page"""
         create_question(question_text="Future question", days=30)
         response = self.client.get(reverse("polls:index"))
-        self.assertContains(response, "No polls are available")
+        self.assertContains(response, "No polls available.")
         self.assertQuerySetEqual(response.context["latest_question_list"], [])
 
 
@@ -108,7 +108,7 @@ class QuestionDetailViewTest(TestCase):
     def test_past_question(self):
         """" The detail view of a question with pub_date in the past
         displays the question text"""
-        past_question = create_question(question_text="Past question", days=-5)
+        past_question = create_question(question_text="Past question.", days=-5)
         url=reverse("polls:detail", args=(past_question.id,))
         response = self.client.get(url)
         self.assertContains(response, past_question.question_text)
